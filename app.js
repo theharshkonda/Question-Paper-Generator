@@ -29,50 +29,66 @@ app.post('/addQuestion', (req, res) => {
 });
 
 app.get('/getQuestions', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(questionStore));
-});
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(questionStore));
+  });
 
 app.get('/generateQuestionPaper', (req, res) => {
   const totalMarks = 100; // Adjust as needed
-  const difficultyDistribution = {
-    Easy: 0.2,
-    Medium: 0.5,
-    Hard: 0.3,
+  const distribution = {
+    easy: 0.2,
+    medium: 0.5,
+    hard: 0.3,
   };
 
-  const questionPaper = generateQuestionPaper(totalMarks, difficultyDistribution);
+  
+  
 
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(questionPaper));
+  const questionPaper = generateQuestionPaper(totalMarks, distribution);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=questionPaper.pdf');
+  
+  const doc = new PDFDocument();
+  doc.pipe(res);
+
+  questionPaper.forEach((question, index) => {
+    doc.fontSize(14).text(`Question ${index + 1}: ${question.question}`, { align: 'left' });
+    doc.fontSize(12).text(`Subject: ${question.subject}`, { align: 'left' });
+    doc.fontSize(12).text(`Topic: ${question.topic}`, { align: 'left' });
+    doc.fontSize(12).text(`Difficulty: ${question.difficulty}`, { align: 'left' });
+    doc.fontSize(12).text(`Marks: ${question.marks}`, { align: 'left' });
+    doc.moveDown();
+  });
+
+  doc.end();
 });
 
 function generateQuestionPaper(totalMarks, distribution) {
   const questionPaper = [];
-  const availableQuestions = { Easy: [], Medium: [], Hard: [] };
-
-  questionStore.forEach(question => {
-    availableQuestions[question.difficulty].push(question);
-  });
 
   for (const difficulty in distribution) {
-    const difficultyCount = Math.floor(totalMarks * distribution[difficulty]);
-    const questions = getRandomQuestions(availableQuestions[difficulty], difficultyCount);
+    const count = Math.floor(totalMarks * distribution[difficulty]);
+    const questions = getQuestionsByDifficulty(difficulty, count);
     questionPaper.push(...questions);
   }
 
   return questionPaper;
 }
 
-function getRandomQuestions(questions, count) {
-  if (questions.length <= count) {
-    return questions;
+function getQuestionsByDifficulty(difficulty, count) {
+  const filteredQuestions = questionStore.filter(
+    (question) => question.difficulty.toLowerCase() === difficulty
+  );
+
+  if (filteredQuestions.length <= count) {
+    return filteredQuestions;
   }
 
-  const shuffledQuestions = questions.sort(() => 0.5 - Math.random());
-  return shuffledQuestions.slice(0, count);
+  return filteredQuestions.slice(0, count);
 }
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
