@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 let questionStore = [];
 
 app.get('/', (req, res) => {
-  res.json("Hello:");
+  res.sendFile(__dirname + '/index.html');
 });
 
 app.post('/addQuestion', (req, res) => {
