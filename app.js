@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
+const IP_ADDRESS = 16.171.168.181;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -89,6 +90,6 @@ function getQuestionsByDifficulty(difficulty, count) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on ${IP_ADDRESS}${PORT}`);
 });
 
