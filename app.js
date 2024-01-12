@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
-const IP_ADDRESS = 16.171.168.181;
+const IP_ADDRESS = '16.171.168.181';
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
